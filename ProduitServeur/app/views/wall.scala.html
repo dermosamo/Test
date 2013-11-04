@@ -1,0 +1,77 @@
+@(tweets: List[Tweet], message: String, tweetForm: Form[Tweet])
+
+@main("Tweety") {
+
+    <h1>@message</h1>
+	
+	<h2>Nouveau Tweet : </h2>
+	
+	@helper.form(action = routes.Application.submitTweet()) {
+	
+	@helper.inputText(tweetForm("commentaire"))
+	@helper.inputText(tweetForm("name"))
+        @helper.inputText(tweetForm("DatePeremption"))
+	
+	<input type="submit" class="btn primary" value="Nouveau produit">
+	
+	}
+	
+	<button class="btn btn-more" type ="button">More Produit</button>
+	
+	<h2>Messages</h2>
+	
+	<table class="table table-striped" id="matable">
+	
+		<tr>
+			<td>nb produit</td>
+			<td>IDProduit</td>
+			<td>DateCreation</td>
+			<td>name</td>
+			<td>DatePeremption</td>
+		</tr>
+		
+	@for((tweet, i) <- produit.zipWithIndex.reverse) {
+		<tr>
+			<td>@i</td>
+			<td>@produit.idProduit</td>
+			<td>@tweet.DateProduction</td>
+                        <td>@tweet.DatePeremption</td>
+			<td>@tweet.name</td>
+			<td>@tweet.commentaire</td>
+		</tr>
+	}
+	</table>
+	
+	Il y a au total @produit.size produit.
+
+}
+<script type="text/javascript">
+$(document).ready(function($){
+
+	$("body").ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+            alert("ERROR : " + thrownError);
+            location.reload();
+        });
+        
+        $btnMoreTweets = $(".btn-more");
+
+	 $btnMoreTweets.click(function(event) {
+            $this = $(this);
+		alert("more produit pressed");
+	 	$.ajax({
+                type: 'POST',
+                url: "@routes.Application.listTweetsFromTo()",
+				contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({"from":@produit.size(), "to":3}),
+                success: function(data){
+                var obj  = eval(data);
+                 for (var tw in obj) {
+                 
+               $('#matable').append('<tr><td>id</td><td>' + obj[tw].idproduit + '</td><td>'+ new Date (obj[tw].DateProduction).toDateString()+ '</td><td>' + obj[tw].name +'</td><td>'+ obj[tw].commentaire+ '</td></tr>');
+                 }
+                   }
+                   })
+               });
+        
+});
+</script>

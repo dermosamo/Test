@@ -1,0 +1,75 @@
+@(tweets: List[Tweet], message: String, tweetForm: Form[Tweet])
+
+@main("Tweety") {
+
+    <h1>@message</h1>
+	
+	<h2>Nouveau Tweet : </h2>
+	
+	@helper.form(action = routes.Application.submitTweet()) {
+	
+	@helper.inputText(tweetForm("commentaire"))
+	@helper.inputText(tweetForm("username"))
+	
+	<input type="submit" class="btn primary" value="tweet !!!">
+	
+	}
+	
+	<button class="btn btn-more" type ="button">More Tweets</button>
+	
+	<h2>Messages</h2>
+	
+	<table class="table table-striped" id="matable">
+	
+		<tr>
+			<td>nb Tweet</td>
+			<td>ID</td>
+			<td>Date</td>
+			<td>Username</td>
+			<td>Tweet</td>
+		</tr>
+		
+	@for((tweet, i) <- tweets.zipWithIndex.reverse) {
+		<tr>
+			<td>@i</td>
+			<td>@tweet.id</td>
+			<td>@tweet.creationDate</td>
+			<td>@tweet.username</td>
+			<td>@tweet.commentaire</td>
+		</tr>
+	}
+	</table>
+	
+	Il y a au total @tweets.size tweets.
+
+}
+<script type="text/javascript">
+$(document).ready(function($){
+
+	$("body").ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+            alert("ERROR : " + thrownError);
+            location.reload();
+        });
+        
+        $btnMoreTweets = $(".btn-more");
+
+	 $btnMoreTweets.click(function(event) {
+            $this = $(this);
+		alert("more button pressed");
+	 	$.ajax({
+                type: 'POST',
+                url: "@routes.Application.listTweetsFromTo()",
+				contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({"from":@tweets.size(), "to":3}),
+                success: function(data){
+                var obj  = eval(data);
+                 for (var tw in obj) {
+                 
+               $('#matable').append('<tr><td>id</td><td>' + obj[tw].id + '</td><td>'+ new Date (obj[tw].creationDate).toDateString()+ '</td><td>' + obj[tw].username +'</td><td>'+ obj[tw].commentaire+ '</td></tr>');
+                 }
+                   }
+                   })
+               });
+        
+});
+</script>
